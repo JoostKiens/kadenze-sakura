@@ -14,6 +14,10 @@
 var tree
 var dragonCurve
 
+// Design size the scene is drawn for; smaller windows scale it down
+var DESIGN_WIDTH = 900
+var scaleFactor = 1
+
 function preload() {
   fontRegular = loadFont('assets/Oswald-Regular.ttf')
 }
@@ -24,12 +28,22 @@ function preload() {
  */
 function setup() {
   createCanvas(windowWidth, windowHeight)
-  // Tree
-  tree = new Tree(createVector(width / 2 + random(-100, 100), height))
-  // DragonCurve
-  dragonCurve = new DragonCurve([width * .35, 210], [width * .65, 190], 8)
-  dragonCurve.setup()
+  buildScene()
   cursor(HAND)
+}
+
+/**
+ * (Re)create tree & dragonCurve for the current window size.
+ * Coordinates are in scaled space: the window size divided by scaleFactor
+ * @return {Void}
+ */
+function buildScene() {
+  scaleFactor = min(1, width / DESIGN_WIDTH)
+  var w = width / scaleFactor
+  var h = height / scaleFactor
+  tree = new Tree(createVector(w / 2 + random(-100, 100) * scaleFactor, h))
+  dragonCurve = new DragonCurve([w * .35, 210], [w * .65, 190], 8)
+  dragonCurve.setup()
 }
 
 /**
@@ -37,15 +51,16 @@ function setup() {
  * @return {Void}
  */
 function mousePressed() {
-  tree = new Tree(createVector(width / 2 + random(-100, 100), height))
+  buildScene()
 }
 
 /**
- * Resize canvas when window is resized
+ * Resize canvas and rebuild the scene when window is resized
  * @return {Void}
  */
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight)
+  buildScene()
 }
 
 /**
@@ -54,10 +69,11 @@ function windowResized() {
  */
 function draw() {
   background('#eaeaea')
+  scale(scaleFactor)
   dragonCurve.display()
   fill('#ccc').strokeWeight(0).textSize(20)
   textFont(fontRegular);
-  text('Click mouse to create a new tree', 10, height - 30)
+  text('Click mouse to create a new tree', 10, height / scaleFactor - 30)
 
 
   tree.update()
